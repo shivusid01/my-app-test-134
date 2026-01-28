@@ -21,12 +21,14 @@ export default function FavoritesTab() {
   const { user } = useAuth();
   const { 
     favouritesRecipes, 
-    removeFromFavourites, 
+    removeFromFavourites,
+    clearAllFavourites,
     loading, 
     refreshFavourites 
   } = useFavourites();
   
   const [refreshing, setRefreshing] = useState(false);
+  const [clearingAll, setClearingAll] = useState(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -170,7 +172,7 @@ export default function FavoritesTab() {
             
             {favouritesRecipes.length > 0 && (
               <TouchableOpacity
-                style={styles.clearAllButton}
+                style={[styles.clearAllButton, clearingAll && styles.clearAllButtonDisabled]}
                 onPress={() => {
                   Alert.alert(
                     'Clear All Favorites',
@@ -180,17 +182,27 @@ export default function FavoritesTab() {
                       { 
                         text: 'Clear All', 
                         style: 'destructive',
-                        onPress: () => {
-                          favouritesRecipes.forEach(recipe => {
-                            removeFromFavourites(recipe._id);
-                          });
+                        onPress: async () => {
+                          setClearingAll(true);
+                          try {
+                            await clearAllFavourites();
+                          } catch (error) {
+                            console.error('Clear all error:', error);
+                          } finally {
+                            setClearingAll(false);
+                          }
                         }
                       }
                     ]
                   );
                 }}
+                disabled={clearingAll}
               >
-                <Text style={styles.clearAllText}>Clear All</Text>
+                {clearingAll ? (
+                  <ActivityIndicator color="#FF6B6B" />
+                ) : (
+                  <Text style={styles.clearAllText}>Clear All</Text>
+                )}
               </TouchableOpacity>
             )}
           </View>
@@ -289,6 +301,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     backgroundColor: '#EDF2F7',
     borderRadius: 8,
+  },
+  clearAllButtonDisabled: {
+    opacity: 0.5,
   },
   clearAllText: {
     fontSize: 12,

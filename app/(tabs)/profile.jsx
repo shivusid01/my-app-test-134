@@ -92,7 +92,7 @@ export default function ProfileTab() {
     fetchProfileData();
   };
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     Alert.alert(
       'Logout',
       'Are you sure you want to logout?',
@@ -101,19 +101,9 @@ export default function ProfileTab() {
         { 
           text: 'Logout', 
           style: 'destructive',
-          onPress: async () => {
-            try {
-              const result = await logout();
-              if (result.success) {
-                // Navigation will be handled by logout function
-                console.log('Logout successful from profile');
-              } else {
-                Alert.alert('Error', result.message || 'Logout failed');
-              }
-            } catch (error) {
-              console.error('Logout error:', error);
-              Alert.alert('Error', 'Logout failed. Please try again.');
-            }
+          onPress: () => {
+            // Call logout directly - it handles everything
+            logout();
           }
         },
       ]

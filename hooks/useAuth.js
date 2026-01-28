@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      console.log('Logging out...'); // Debug log
+      console.log('Logging out...');
       
       // Clear AsyncStorage
       await AsyncStorage.multiRemove(['recipe_app_token', 'recipe_app_user']);
@@ -93,15 +93,21 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       setToken(null);
       
-      console.log('Logout successful'); // Debug log
+      console.log('Logout successful');
       
-      // Navigate to login
-      router.replace('/login');
+      // Navigate to login with replace to clear navigation stack
+      setTimeout(() => {
+        router.replace('/login');
+      }, 100);
       
       return { success: true };
     } catch (error) {
       console.error('Logout error:', error);
-      return { success: false, message: 'Logout failed' };
+      // Still clear state even if storage fails
+      setUser(null);
+      setToken(null);
+      router.replace('/login');
+      return { success: true };
     }
   };
 

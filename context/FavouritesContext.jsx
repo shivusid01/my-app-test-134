@@ -150,7 +150,7 @@ export const FavouritesProvider = ({ children }) => {
   const removeFromFavourites = async (recipeId) => {
     try {
       console.log('Removing recipe from favourites:', recipeId);
-      await axios.delete(`${API_BASE_URL}/users/favourites/${recipeId}`, {
+      await axios.delete(`${API_BASE_URL}/users/favorites/${recipeId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -161,6 +161,48 @@ export const FavouritesProvider = ({ children }) => {
       console.error('Error removing from favourites:', error.response?.data || error.message);
       alert(`Error: ${error.response?.data?.message || 'Failed to remove from favourites'}`);
       return false;
+    }
+  };
+
+  const clearAllFavourites = async () => {
+    try {
+      console.log('Clearing all favourites, count:', favourites.length);
+      
+      if (favourites.length === 0) {
+        console.log('No favourites to clear');
+        return true;
+      }
+      
+      setLoading(true);
+      
+      // Remove each recipe from favorites
+      const removePromises = favourites.map(recipeId =>
+        axios.delete(`${API_BASE_URL}/users/favorites/${recipeId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).then(() => {
+          console.log(`Successfully removed ${recipeId}`);
+        }).catch(error => {
+          console.error(`Error removing recipe ${recipeId}:`, error.message);
+          // Continue even if one fails
+          return Promise.resolve();
+        })
+      );
+      
+      await Promise.all(removePromises);
+      
+      // Clear local state
+      setFavourites([]);
+      setFavouritesRecipes([]);
+      console.log('All favourites cleared successfully');
+      
+      alert('All favorites cleared!');
+      return true;
+    } catch (error) {
+      console.error('Error clearing all favourites:', error.response?.data || error.message);
+      alert(`Error: ${error.response?.data?.message || 'Failed to clear favourites'}`);
+      return false;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -179,6 +221,7 @@ export const FavouritesProvider = ({ children }) => {
       toggleFavourite,
       addToFavourites,
       removeFromFavourites,
+      clearAllFavourites,
       isFavourite,
       refreshFavourites: fetchFavourites
     }}>
