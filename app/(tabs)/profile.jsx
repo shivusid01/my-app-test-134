@@ -102,7 +102,8 @@ export default function ProfileTab() {
           text: 'Logout', 
           style: 'destructive',
           onPress: () => {
-            // Call logout directly - it handles everything
+            console.log('User confirmed logout');
+            // Call logout directly
             logout();
           }
         },

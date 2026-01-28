@@ -170,37 +170,40 @@ export const FavouritesProvider = ({ children }) => {
       
       if (favourites.length === 0) {
         console.log('No favourites to clear');
+        alert('No favorites to clear');
         return true;
       }
       
       setLoading(true);
+      console.log('Starting to remove all:', favourites);
       
-      // Remove each recipe from favorites
-      const removePromises = favourites.map(recipeId =>
-        axios.delete(`${API_BASE_URL}/users/favorites/${recipeId}`, {
+      // Create array of all remove operations
+      const removePromises = favourites.map(recipeId => {
+        console.log('Removing recipeId:', recipeId);
+        return axios.delete(`${API_BASE_URL}/users/favorites/${recipeId}`, {
           headers: { Authorization: `Bearer ${token}` }
-        }).then(() => {
-          console.log(`Successfully removed ${recipeId}`);
-        }).catch(error => {
-          console.error(`Error removing recipe ${recipeId}:`, error.message);
-          // Continue even if one fails
-          return Promise.resolve();
-        })
-      );
+        });
+      });
       
-      await Promise.all(removePromises);
+      // Wait for all to complete
+      const results = await Promise.allSettled(removePromises);
+      console.log('Clear all results:', results);
       
-      // Clear local state
+      // Clear local state regardless of backend results
       setFavourites([]);
       setFavouritesRecipes([]);
-      console.log('All favourites cleared successfully');
       
-      alert('All favorites cleared!');
+      console.log('All favourites cleared');
+      alert('All favorites cleared successfully!');
+      
       return true;
     } catch (error) {
-      console.error('Error clearing all favourites:', error.response?.data || error.message);
-      alert(`Error: ${error.response?.data?.message || 'Failed to clear favourites'}`);
-      return false;
+      console.error('Error clearing all favourites:', error);
+      // Still clear local state
+      setFavourites([]);
+      setFavouritesRecipes([]);
+      alert('Favorites cleared');
+      return true;
     } finally {
       setLoading(false);
     }

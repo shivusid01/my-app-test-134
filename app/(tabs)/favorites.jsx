@@ -201,7 +201,7 @@ export default function FavoritesTab() {
                 {clearingAll ? (
                   <ActivityIndicator color="#FF6B6B" />
                 ) : (
-                  <Text style={styles.clearAllText}>Clear All</Text>
+                  <Text style={styles.clearAllText}> </Text>
                 )}
               </TouchableOpacity>
             )}
